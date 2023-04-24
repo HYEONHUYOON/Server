@@ -1,4 +1,4 @@
-#include "..\Common.h"
+#include "Common.h"
 #include <cstring>
 #include <iostream>
 
@@ -54,6 +54,9 @@ int main(int argc, char *argv[])
 	
 	ringBuffer msgBuffer[10];
 
+	//STX Condition
+	bool isSTX = false;
+
 	while (1) {
 
 		// accept()
@@ -72,6 +75,8 @@ int main(int argc, char *argv[])
 
 		// 클라이언트와 데이터 통신
 		while (1) {
+
+			isSTX = false;
 			// 데이터 받기
 			retval = recv(client_sock, buf, BUFSIZE, 0);
 			if (retval == SOCKET_ERROR) {
@@ -82,18 +87,18 @@ int main(int argc, char *argv[])
 				break;
 			
 			string STX = "";
-			bool isSTX = false;
 
 			//링버퍼로 데이터 관리
 			for (int i = 0, buffLength = 0; i < retval; i++){
 
 				//STX
-				if (!isSTX) {
+				if (!isSTX) { 
+					//세글자 확인
 					for (int i = 0;i < 3; i++)
 					{
 						STX += buf[i];
 					}
-					if (!STX.compare("GET") || !STX.compare("PUT"))
+					if (STX.compare("GET") == 0 || STX.compare("PUT") == 0)
 					{
 						isSTX = true;
 						msgBuffer[ringBufferCount].flag == 0x03;
@@ -101,10 +106,13 @@ int main(int argc, char *argv[])
 					else
 					{
 						STX += buf[3];
-						if (!STX.compare("POST"))
+						if (STX.compare("POST") == 0)
 						{
 							isSTX = true;
 							msgBuffer[ringBufferCount].flag == 0x03;
+						}
+						else {
+							isSTX = false;
 						}
 					}
 					//이 세개가 아니면 들여보내지 마셈
@@ -112,58 +120,68 @@ int main(int argc, char *argv[])
 				
 				}
 
-				//버퍼가 비었을 때
-				if (msgBuffer[ringBufferCount].flag == 0x00)
-				{
-					//버퍼에 메세지 넣기
-					//상태 변경
-					msgBuffer[ringBufferCount].flag = 0x01;
-					buffLength = 0;
-
-				}
-				//버퍼에 데이터를 넣는 중이라면
-				else if (msgBuffer[ringBufferCount].flag == 0x01)
-				{
-					buffLength = strlen(msgBuffer[ringBufferCount].msg);
-				}
-
-				string ETX ="";
-
-				if (buf[i] == '\r')
-				{
-					ETX += buf[i];
-					ETX += buf[i + 1];
-					ETX += buf[i + 2];
-					ETX += buf[i + 3];
-				}
-
-				if (ETX.compare("\r\n\r\n") == 0) {
-					cout << ETX;
-					msgBuffer[ringBufferCount].msg[buffLength] = '\n';
-					msgBuffer[ringBufferCount].flag = 0x02;
-					buffLength = 0;
-
-					if (ringBufferCount > 8)
+				if (isSTX) {
+					//버퍼가 비었을 때
+					if (msgBuffer[ringBufferCount].flag == 0x00)
 					{
-						ringBufferCount = 0;
+						//버퍼에 메세지 넣기
+						//상태 변경
+						msgBuffer[ringBufferCount].flag = 0x01;
+						buffLength = 0;
+
+					}
+					//버퍼에 데이터를 넣는 중이라면
+					else if (msgBuffer[ringBufferCount].flag == 0x01)
+					{
+						buffLength = strlen(msgBuffer[ringBufferCount].msg);
+					}
+
+					string ETX = "";
+
+					if (buf[i] == '\r')
+					{
+						ETX += buf[i];
+						ETX += buf[i + 1];
+						ETX += buf[i + 2];
+						ETX += buf[i + 3];
+					}
+
+					if (ETX.compare("\r\n\r\n") == 0) {
+						cout << ETX;
+						msgBuffer[ringBufferCount].msg[buffLength] = '\n';
+						msgBuffer[ringBufferCount].flag = 0x02;
+						buffLength = 0;
+
+						if (ringBufferCount > 8)
+						{
+							ringBufferCount = 0;
+						}
+						else
+						{
+							ringBufferCount++;
+						}
 					}
 					else
 					{
-						ringBufferCount++;
+						ETX = "";
+						msgBuffer[ringBufferCount].msg[buffLength++] = buf[i];
+						msgBuffer[ringBufferCount].msg[buffLength] = '\0';
 					}
-				}
-				else
-				{
-					ETX = "";
-					msgBuffer[ringBufferCount].msg[buffLength++] = buf[i];
-					msgBuffer[ringBufferCount].msg[buffLength] = '\0';
 				}
 			}
 			
-			// 받은 데이터 출력
-			buf[retval] = '\0';
-			printf("[TCP/%s:%d] %s\n", addr, ntohs(clientaddr.sin_port), buf);
-			
+			//STX 부합하지 않으면
+			if (isSTX) {
+				cout << STX << endl;
+				// 받은 데이터 출력
+				buf[retval] = '\0';
+				printf("[TCP/%s:%d] %s\n", addr, ntohs(clientaddr.sin_port), buf);	
+			}
+			else
+			{
+				cout << "STX 기준에 맞지 않음" << endl;
+			}
+
 			// 데이터 보내기
 			retval = send(client_sock, buf, retval, 0);
 			if (retval == SOCKET_ERROR) {

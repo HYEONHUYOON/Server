@@ -1,5 +1,5 @@
 ﻿  TCPServer.cpp
-C:\Users\YUHAN\Desktop\서버\tcp\TCPServer\TCPServer.cpp(99,39): warning C4553: '==': 식의 결과가 사용되지 않습니다. '='을(를) 의도했습니까?
-C:\Users\YUHAN\Desktop\서버\tcp\TCPServer\TCPServer.cpp(107,40): warning C4553: '==': 식의 결과가 사용되지 않습니다. '='을(를) 의도했습니까?
-C:\Users\YUHAN\Desktop\서버\tcp\TCPServer\TCPServer.cpp(128,57): warning C4267: '=': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-  TCPServer.vcxproj -> C:\Users\YUHAN\Desktop\서버\tcp\TCPServer\x64\Debug\TCPServer.exe
+C:\Users\윤현후\Desktop\프로그래밍\Server-main\TCPServer\TCPServer.cpp(104,39): warning C4553: '==': 식의 결과가 사용되지 않습니다. '='을(를) 의도했습니까?
+C:\Users\윤현후\Desktop\프로그래밍\Server-main\TCPServer\TCPServer.cpp(112,40): warning C4553: '==': 식의 결과가 사용되지 않습니다. '='을(를) 의도했습니까?
+C:\Users\윤현후\Desktop\프로그래밍\Server-main\TCPServer\TCPServer.cpp(136,58): warning C4267: '=': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+LINK : fatal error LNK1168: C:\Users\윤현후\Desktop\프로그래밍\Server-main\TCPServer\x64\Debug\TCPServer.exe을(를) 쓰기용으로 열 수 없습니다.

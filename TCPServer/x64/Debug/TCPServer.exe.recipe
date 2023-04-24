@@ -2,7 +2,7 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
-      <FullPath>C:\Users\YUHAN\Desktop\서버\tcp\TCPServer\x64\Debug\TCPServer.exe</FullPath>
+      <FullPath>C:\Users\윤현후\Desktop\프로그래밍\Server-main\TCPServer\x64\Debug\TCPServer.exe</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
   <ContentFiles />

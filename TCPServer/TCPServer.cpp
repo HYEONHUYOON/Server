@@ -57,10 +57,17 @@ int main(int argc, char *argv[])
 	//STX Condition
 	bool isSTX = false;
 
+	char ContType[100];
+	int ContLenth;
+
+	char Body[1024];
+
+	char coo[100];
+
 	while (1) {
 
 		// accept()
-		addrlen = sizeof(clientaddr);
+		addrlen = sizeof(clientaddr); 
 		client_sock = accept(listen_sock, (struct sockaddr *)&clientaddr, &addrlen);
 		if (client_sock == INVALID_SOCKET) {
 			err_display("accept()");
@@ -73,9 +80,9 @@ int main(int argc, char *argv[])
 		printf("\n[TCP 서버] 클라이언트 접속: IP 주소=%s, 포트 번호=%d\n",
 			addr, ntohs(clientaddr.sin_port));
 
+		char cont[100];
 		// 클라이언트와 데이터 통신
 		while (1) {
-
 			isSTX = false;
 			// 데이터 받기
 			retval = recv(client_sock, buf, BUFSIZE, 0);
@@ -90,7 +97,28 @@ int main(int argc, char *argv[])
 
 			//링버퍼로 데이터 관리
 			for (int i = 0, buffLength = 0; i < retval; i++){
+		
+				if (buf[i] == 'C')
+				{
+					int contCnt = 0;
+					char contCheck = buf[i + contCnt];
+					while (contCheck != ' ')
+					{
+						cont[contCnt] = contCheck;
+						contCnt++;
+						contCheck = buf[i + contCnt];
+					}
+					cont[contCnt] = '\0';
 
+					strcpy(coo, cont);
+
+					if (strcmp(cont, "Content-Length: ") == 0)
+					{
+						
+					}
+				    printf("%s", cont);
+					//if(strcmp(contCheck))
+				}
 				//STX
 				if (!isSTX) { 
 					//세글자 확인
@@ -115,9 +143,6 @@ int main(int argc, char *argv[])
 							isSTX = false;
 						}
 					}
-					//이 세개가 아니면 들여보내지 마셈
-					//postman 으로 클라이언트 데이터 보내기
-				
 				}
 
 				if (isSTX) {
@@ -136,18 +161,18 @@ int main(int argc, char *argv[])
 						buffLength = strlen(msgBuffer[ringBufferCount].msg);
 					}
 
-					string ETX = "";
+					char ETX[4];
 
 					if (buf[i] == '\r')
 					{
-						ETX += buf[i];
-						ETX += buf[i + 1];
-						ETX += buf[i + 2];
-						ETX += buf[i + 3];
+						ETX[0] += buf[i];
+						ETX[1] += buf[i + 1];
+						ETX[2] += buf[i + 2];
+						ETX[3] += buf[i + 3];
 					}
 
-					if (ETX.compare("\r\n\r\n") == 0) {
-						cout << ETX;
+
+					if (strcmp("\r\n\r\n",ETX) == 0) {
 						msgBuffer[ringBufferCount].msg[buffLength] = '\n';
 						msgBuffer[ringBufferCount].flag = 0x02;
 						buffLength = 0;
@@ -163,19 +188,21 @@ int main(int argc, char *argv[])
 					}
 					else
 					{
-						ETX = "";
 						msgBuffer[ringBufferCount].msg[buffLength++] = buf[i];
 						msgBuffer[ringBufferCount].msg[buffLength] = '\0';
 					}
 				}
 			}
 			
+
 			//STX 부합하지 않으면
 			if (isSTX) {
-				cout << STX << endl;
+
 				// 받은 데이터 출력
 				buf[retval] = '\0';
-				printf("[TCP/%s:%d] %s\n", addr, ntohs(clientaddr.sin_port), buf);	
+				printf("[TCP/%s:%d] %s\n", addr, ntohs(clientaddr.sin_port), buf);
+
+				printf("%s", coo);
 			}
 			else
 			{

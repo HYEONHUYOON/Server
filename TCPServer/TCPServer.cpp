@@ -5,6 +5,8 @@
 #define SERVERPORT 9000
 #define BUFSIZE    512
 
+typedef __int8 Bool;
+
 typedef struct {
 	//flag Condition
 	//0x00 => empty
@@ -16,9 +18,92 @@ typedef struct {
 	char msg[1000];
 }ringBuffer;
 
+typedef struct {
+	char method[10];
+	char URL[100];
+	char Version[100];
+	char ContType[100];
+	int ContLen;
+}headerInform;
+
 using namespace std;
 
 static int ringBufferCount = 0;
+
+Bool CheckMethod(char* method)
+{
+	if (!strcmp(method, "GET") || !strcmp(method, "POST") || !strcmp(method, "PUT"))
+	{
+		return 1;
+	}
+	return 0;
+}
+
+
+//헤더 내용 받기
+Bool GetHederInformation(char* str,headerInform* receiveHeader) {
+	char buf[BUFSIZ];
+	buf[0]='\0';
+	strcpy(buf, str);
+	strcpy(receiveHeader->method,strtok(buf, " "));
+	if (!CheckMethod(receiveHeader->method))
+	{
+		return 0;
+	}
+	strcpy(receiveHeader->URL, strtok(NULL, " "));
+	strcpy(receiveHeader->Version, strtok(NULL, "\r\n"));
+	
+	char checkContent[BUFSIZ];
+	while (1)
+	{
+		strcpy(checkContent, strtok(NULL, "\r\n"));
+
+		//Body가 나오면 종료
+		if (strcmp(checkContent, "{") == 0) {
+			break;
+		}
+
+		char a[BUFSIZ];
+		int i = 0;
+		while (checkContent[i]!=':')
+		{
+			a[i] = checkContent[i];
+			i++;
+		}
+		a[i] = '\0';
+
+		if (strcmp(a, "Content-Type") == 0) {
+			strcpy(receiveHeader->ContType, checkContent + i);
+		}else if (strcmp(a, "Content-Length") == 0) {
+			receiveHeader->ContLen = atoi(checkContent + (i+1));
+		}
+	}
+	printf("METHOD : %s\nURL : %s\nVERSION : %s\nTYPE : %s\nLENGHT : %d\n", receiveHeader->method, receiveHeader->URL, receiveHeader->Version, receiveHeader->ContType, receiveHeader->ContLen);
+	return 1;
+}
+
+//바디 받기
+void GetBody(char* str,char* body)
+{
+	int i = 0;
+	int bodyCnt = 0;
+	while (str[i] != '\0')
+	{
+		//body
+		if (str[i] == '{') {
+			while (str[i] != '}') {
+				body[bodyCnt] = str[i];
+				i++;
+				bodyCnt++;
+			}
+		}
+		else {
+			i++;
+		}
+	}
+	body[bodyCnt] = '}';
+	body[bodyCnt+1] = '\0';
+}
 
 int main(int argc, char *argv[])
 {
@@ -55,7 +140,7 @@ int main(int argc, char *argv[])
 	ringBuffer msgBuffer[10];
 
 	//STX Condition
-	bool isSTX = false;
+	Bool isSTX = 0;
 
 	char ContType[100];
 	int ContLenth;
@@ -92,8 +177,18 @@ int main(int argc, char *argv[])
 			}
 			else if (retval == 0)
 				break;
-			
+
+			buf[retval] = '\0';
+
 			string STX = "";
+			
+			headerInform recevieHeader;
+			char body[BUFSIZE];
+			if (!GetHederInformation(buf, &recevieHeader)) {
+				isSTX = 1;
+			}
+			GetBody(buf,body);
+			printf("BODY : %s\n", body);
 
 			//링버퍼로 데이터 관리
 			for (int i = 0, buffLength = 0; i < retval; i++){
@@ -116,7 +211,7 @@ int main(int argc, char *argv[])
 					{
 						
 					}
-				    printf("%s", cont);
+				    //printf("%s", cont);
 					//if(strcmp(contCheck))
 				}
 				//STX
@@ -198,11 +293,11 @@ int main(int argc, char *argv[])
 			//STX 부합하지 않으면
 			if (isSTX) {
 
-				// 받은 데이터 출력
 				buf[retval] = '\0';
-				printf("[TCP/%s:%d] %s\n", addr, ntohs(clientaddr.sin_port), buf);
+				//printf("[TCP/%s:%d] %s\n", addr, ntohs(clientaddr.sin_port), buf);
+				printf("%s\n",buf);
 
-				printf("%s", coo);
+				//printf("%s", coo);
 			}
 			else
 			{

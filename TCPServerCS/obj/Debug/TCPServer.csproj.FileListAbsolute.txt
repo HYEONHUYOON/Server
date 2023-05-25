@@ -1,0 +1,8 @@
+C:\Users\YUHAN\Desktop\Csharp\Chapter04\TCPServer\bin\Debug\TCPServer.exe.config
+C:\Users\YUHAN\Desktop\Csharp\Chapter04\TCPServer\bin\Debug\TCPServer.exe
+C:\Users\YUHAN\Desktop\Csharp\Chapter04\TCPServer\bin\Debug\TCPServer.pdb
+C:\Users\YUHAN\Desktop\Csharp\Chapter04\TCPServer\obj\Debug\TCPServer.csproj.AssemblyReference.cache
+C:\Users\YUHAN\Desktop\Csharp\Chapter04\TCPServer\obj\Debug\TCPServer.csproj.SuggestedBindingRedirects.cache
+C:\Users\YUHAN\Desktop\Csharp\Chapter04\TCPServer\obj\Debug\TCPServer.csproj.CoreCompileInputs.cache
+C:\Users\YUHAN\Desktop\Csharp\Chapter04\TCPServer\obj\Debug\TCPServer.exe
+C:\Users\YUHAN\Desktop\Csharp\Chapter04\TCPServer\obj\Debug\TCPServer.pdb

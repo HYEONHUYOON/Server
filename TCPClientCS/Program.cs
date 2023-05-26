@@ -5,32 +5,31 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Net;
 using System.Net.Sockets;
-//using Internal;
 
-namespace TCPServer
+namespace TCPClient
 {
     class Program
     {
+        static string SERVERIP = "127.0.0.1";
         const int SERVERPORT = 9000;
         const int BUFSIZE = 512;
-        const string denyIP = "127.0.0.1";
 
         static void Main(string[] args)
         {
             int retval;
 
-            Socket listen_sock = null;
+            // 명령행 인수가 있으면 IP 주소로 사용
+            if (args.Length > 0) SERVERIP = args[0];
+
+            Socket sock = null;
             try
             {
                 // 소켓 생성
-                listen_sock = new Socket(AddressFamily.InterNetwork,
+                sock = new Socket(AddressFamily.InterNetwork,
                     SocketType.Stream, ProtocolType.Tcp);
 
-                // Bind()
-                listen_sock.Bind(new IPEndPoint(IPAddress.Any, SERVERPORT));
-
-                // Listen()
-                listen_sock.Listen(Int32.MaxValue);
+                // Connect()
+                sock.Connect(SERVERIP, SERVERPORT);
             }
             catch (Exception e)
             {
@@ -39,70 +38,84 @@ namespace TCPServer
             }
 
             // 데이터 통신에 사용할 변수
-            Socket client_sock = null;
-            IPEndPoint clientaddr = null;
             byte[] buf = new byte[BUFSIZE];
 
-            while (true)
+            // 데이터 받기
+            retval = ReceiveN(sock, buf, 3, SocketFlags.None);
+            string statusCode = Encoding.Default.GetString(buf, 0, retval);
+            Console.WriteLine("[Status Code] : {0}", statusCode);
+
+            if (statusCode.Equals("403"))
             {
-                try
+                Console.WriteLine("종료");
+            }
+            else
+            {
+
+                // 서버와 데이터 통신
+                while (true)
                 {
-                    // accept()
-                    client_sock = listen_sock.Accept();
+                    // 데이터 입력
+                    Console.Write("\n[보낼 데이터] ");
+                    string data = Console.ReadLine();
+                    if (data.Length == 0) break;
 
-                    // 접속한 클라이언트 정보 출력
-                    clientaddr = (IPEndPoint)client_sock.RemoteEndPoint;
-
-                    //거부 ip 체크
-                    if (String.Equals(denyIP, clientaddr.Address.ToString()))
+                    try
                     {
-                        byte[] bytes = Encoding.Default.GetBytes("200");
-                        client_sock.Send(bytes, bytes.Length, SocketFlags.None);
-
+                        // 데이터 보내기 (최대 길이를 BUFSIZE로 제한)
+                        byte[] senddata = Encoding.Default.GetBytes(data);
+                        int size = senddata.Length;
+                        if (size > BUFSIZE) size = BUFSIZE;
+                        retval = sock.Send(senddata, 0, size, SocketFlags.None);
                         Console.WriteLine(
-                        "\n[TCP 서버] 클라이언트 접속: IP 주소={0}, 포트 번호={1}",
-                        clientaddr.Address, clientaddr.Port);
+                            "[TCP 클라이언트] {0}바이트를 보냈습니다.", retval);
 
-                        // 클라이언트와 데이터 통신
-                        while (true)
-                        {
+                        // 데이터 받기
+                        retval = ReceiveN(sock, buf, retval, SocketFlags.None);
+                        if (retval == 0) break;
 
-                            // 데이터 받기
-                            retval = client_sock.Receive(buf, BUFSIZE, SocketFlags.None);
-                            if (retval == 0) break;
-
-                            // 받은 데이터 출력
-                            Console.WriteLine("[TCP/{0}:{1}] {2}",
-                                clientaddr.Address, clientaddr.Port,
-                                Encoding.Default.GetString(buf, 0, retval));
-
-                            // 데이터 보내기
-                            client_sock.Send(buf, retval, SocketFlags.None);
-                        }
-
-                        // 소켓 닫기
-                        client_sock.Close();
+                        // 받은 데이터 출력
                         Console.WriteLine(
-                            "[TCP 서버] 클라이언트 종료: IP 주소={0}, 포트 번호={1}",
-                            clientaddr.Address, clientaddr.Port);
+                            "[TCP 클라이언트] {0}바이트를 받았습니다.", retval);
+                        Console.WriteLine("[받은 데이터] {0}",
+                            Encoding.Default.GetString(buf, 0, retval));
                     }
-                    else
+                    catch (Exception e)
                     {
-                        Console.WriteLine("접속을 거부 합니다.");
-                        byte[] bytes = Encoding.Default.GetBytes("403");
-                        client_sock.Send(bytes,bytes.Length, SocketFlags.None);
+                        Console.WriteLine(e.Message);
+                        break;
                     }
-
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e.Message);
-                    break;
                 }
             }
 
             // 소켓 닫기
-            listen_sock.Close();
+            sock.Close();
+        }
+
+        // C/C++, Python과 달리 데이터 수신 소켓 함수가 MSG_WAITALL
+        // 플래그를 지원하지 않으므로 해당 기능을 직접 구현한다.
+        static int ReceiveN(Socket sock, byte[] buf, int len, SocketFlags flags)
+        {
+            int received;
+            int offset = 0;
+            int left = len;
+
+            while (left > 0)
+            {
+                try
+                {
+                    received = sock.Receive(buf, offset, left, flags);
+                    if (received == 0) break;
+                    left -= received;
+                    offset += received;
+                }
+                catch (Exception e)
+                {
+                    throw e;
+                }
+            }
+
+            return len - left;
         }
     }
 }

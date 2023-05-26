@@ -1,10 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Net;
 using System.Net.Sockets;
+//using Internal;
 
 namespace TCPServer
 {
@@ -12,7 +13,7 @@ namespace TCPServer
     {
         const int SERVERPORT = 9000;
         const int BUFSIZE = 512;
-        const string denyIP = "127.18.27.250";
+        const string denyIP = "127.0.0.1";
 
         static void Main(string[] args)
         {
@@ -52,8 +53,12 @@ namespace TCPServer
                     // 접속한 클라이언트 정보 출력
                     clientaddr = (IPEndPoint)client_sock.RemoteEndPoint;
 
-                    if (String.Equals(denyIP,clientaddr.Address.ToString()))
+                    //거부 ip 체크
+                    if (String.Equals(denyIP, clientaddr.Address.ToString()))
                     {
+                        byte[] bytes = Encoding.Default.GetBytes("200");
+                        client_sock.Send(bytes, bytes.Length, SocketFlags.None);
+
                         Console.WriteLine(
                         "\n[TCP 서버] 클라이언트 접속: IP 주소={0}, 포트 번호={1}",
                         clientaddr.Address, clientaddr.Port);
@@ -61,6 +66,7 @@ namespace TCPServer
                         // 클라이언트와 데이터 통신
                         while (true)
                         {
+
                             // 데이터 받기
                             retval = client_sock.Receive(buf, BUFSIZE, SocketFlags.None);
                             if (retval == 0) break;
@@ -83,10 +89,10 @@ namespace TCPServer
                     else
                     {
                         Console.WriteLine("접속을 거부 합니다.");
-                        byte[] bytes = Encoding.UTF8.GetBytes("접속 불가");
-                        client_sock.Send(bytes, 10, SocketFlags.None);
+                        byte[] bytes = Encoding.Default.GetBytes("403");
+                        client_sock.Send(bytes,bytes.Length, SocketFlags.None);
                     }
-                    
+
                 }
                 catch (Exception e)
                 {

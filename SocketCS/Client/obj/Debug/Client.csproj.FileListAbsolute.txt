@@ -1,0 +1,15 @@
+C:\Users\윤현후\source\repos\TCPProj\Client\bin\Debug\Client.exe.config
+C:\Users\윤현후\source\repos\TCPProj\Client\bin\Debug\Client.exe
+C:\Users\윤현후\source\repos\TCPProj\Client\bin\Debug\Client.pdb
+C:\Users\윤현후\source\repos\TCPProj\Client\obj\Debug\Client.csproj.AssemblyReference.cache
+C:\Users\윤현후\source\repos\TCPProj\Client\obj\Debug\Client.csproj.CoreCompileInputs.cache
+C:\Users\윤현후\source\repos\TCPProj\Client\obj\Debug\Client.exe
+C:\Users\윤현후\source\repos\TCPProj\Client\obj\Debug\Client.pdb
+C:\Users\YUHAN\Desktop\Server-main\Server-main\SocketCS\Client\bin\Debug\Client.exe.config
+C:\Users\YUHAN\Desktop\Server-main\Server-main\SocketCS\Client\bin\Debug\Client.exe
+C:\Users\YUHAN\Desktop\Server-main\Server-main\SocketCS\Client\bin\Debug\Client.pdb
+C:\Users\YUHAN\Desktop\Server-main\Server-main\SocketCS\Client\obj\Debug\Client.csproj.AssemblyReference.cache
+C:\Users\YUHAN\Desktop\Server-main\Server-main\SocketCS\Client\obj\Debug\Client.csproj.SuggestedBindingRedirects.cache
+C:\Users\YUHAN\Desktop\Server-main\Server-main\SocketCS\Client\obj\Debug\Client.csproj.CoreCompileInputs.cache
+C:\Users\YUHAN\Desktop\Server-main\Server-main\SocketCS\Client\obj\Debug\Client.exe
+C:\Users\YUHAN\Desktop\Server-main\Server-main\SocketCS\Client\obj\Debug\Client.pdb
